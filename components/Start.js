@@ -9,6 +9,8 @@ import {
   ImageBackground,
   Dimensions,
   Image,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 // import SvgIcon from "../assets/icon.svg"; // Import the SVG icon
@@ -29,17 +31,14 @@ const Start = () => {
       <View style={styles.container}>
         <Text style={styles.title}>Sync</Text>
         <View style={styles.fixedLayout}>
-          
-            {/* <View style={styles.inputWrapper}> */}
-            {/* <SvgIcon width={24} height={24} style={styles.icon} /> */}
-            <TextInput
-              style={styles.textInput}
-              value={name}
-              onChangeText={setName}
-              placeholder="Your Name"
-            />
-       
-
+          {/* <View style={styles.inputWrapper}> */}
+          {/* <SvgIcon width={24} height={24} style={styles.icon} /> */}
+          <TextInput
+            style={styles.textInput}
+            value={name}
+            onChangeText={setName}
+            placeholder="Your Name"
+          />
           <Text style={styles.chooseColorText}>Choose a background color</Text>
           <View style={styles.colorContainer}>
             <TouchableOpacity
@@ -68,6 +67,9 @@ const Start = () => {
             </TouchableOpacity>
           </View>
         </View>
+        {Platform.OS === "ios" ? (
+          <KeyboardAvoidingView behavior="padding" />
+        ) : null}
       </View>
     </ImageBackground>
   );

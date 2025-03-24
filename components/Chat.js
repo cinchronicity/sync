@@ -13,9 +13,10 @@ import {
   Day,
   SystemMessage,
 } from "react-native-gifted-chat";
+import { collection, query, orderBy, onSnapshot, addDoc, where } from "firebase/firestore";
 
-const Chat = ({ route, navigation }) => {
-  const { name, chatColor } = route.params;
+const Chat = ({ route, navigation, db }) => {
+  const { name, chatColor, userID } = route.params;
   const [messages, setMessages] = useState([]);
 
   // Function to determine text color based on background color
@@ -25,34 +26,37 @@ const Chat = ({ route, navigation }) => {
   };
   const textColor = getTextColor(chatColor);
 
-  //empty array as second argument triggers the effect only once after the initial render
   useEffect(() => {
+    // 
     navigation.setOptions({ title: name });
-    setMessages([
-      {
-        _id: 1,
-        text: "Hello developer",
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: "React Native",
-          avatar: "https://placeimg.com/140/140/any",
-        },
-      },
-      {
-        _id: 2,
-        text: "This is a system message",
-        createdAt: new Date(),
-        system: true,
-      },
-    ]);
-  }, []);
 
-  const onSend = (newMessages) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, newMessages)
+    // Firestore query
+    const messagesQuery = query(
+      collection(db, "messages"),
+      // where("user._id", "==", userID), // Fetch only messages sent by this user
+      orderBy("createdAt", "desc")
     );
+
+    // Real-time listener for messages
+    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+      const fetchedMessages = snapshot.docs.map((doc) => ({
+        _id: doc.id, //use firestore document ID as unique key
+        text: doc.data().text,
+        createdAt: doc.data().createdAt.toDate(), // Convert Firestore Timestamp to Date
+        user: doc.data().user,
+      }));
+      // Update the state with the fetched messages
+      setMessages(fetchedMessages);
+    });
+
+    return () => unsubscribe(); // Cleanup Firestore listener on unmount
+  }, [db, userID]); // Re-run effect when userID changes
+
+  //save sent messages to Firestore database
+  const onSend = (newMessages) => {
+    addDoc(collection(db, "messages"), newMessages[0]);
   };
+
   // Custom render for system messages from the GiftedChat library
   const renderSystemMessage = (props) => {
     return (
@@ -90,15 +94,16 @@ const Chat = ({ route, navigation }) => {
         renderBubble={renderBubble}
         onSend={(messages) => onSend(messages)}
         user={{
-          _id: 1,
-          name,
+          _id: userID, // Unique ID for the user
+          name: name, 
         }}
         renderSystemMessage={renderSystemMessage} // Custom system message
         renderDay={renderDay} // Custom date
       />
-      {Platform.OS === "android" ? (
-        <KeyboardAvoidingView behavior="height" />
-      ) : null}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "android" ? "height" : "padding"}
+        keyboardVerticalOffset={-210}
+      />
     </View>
   );
 };

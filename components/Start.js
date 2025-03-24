@@ -11,66 +11,88 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 // import SvgIcon from "../assets/icon.svg"; // Import the SVG icon
+import { getAuth, signInAnonymously } from "firebase/auth";
 
 const Start = () => {
   const [name, setName] = useState("");
   const [chatColor, setChatColor] = useState("#FFFFFF"); // Default chat color
   const navigation = useNavigation();
 
-  const handleStartChatting = () => {
-    navigation.navigate("Chat", { name, chatColor });
+  const auth = getAuth(); // Initialize outside for efficiency
+
+  const handleSignIn = () => {
+    signInAnonymously(auth)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log("User signed in anonymously:", user);
+        //Pass userID to Chat so the app knows which messages belong to the user
+        navigation.navigate("Chat", { userID: user.uid, name, chatColor });
+        Alert.alert("Signed in Successfully!");
+      })
+      .catch((error) => {
+        console.error("Error signing in anonymously:", error.message);
+        Alert.alert("Unable to sign in, please try again later.");
+      });
   };
+
   return (
     <ImageBackground
       source={require("../assets/background-image.png")}
       style={styles.background}
     >
-      <View style={styles.container}>
-        <Text style={styles.title}>Sync</Text>
-        <View style={styles.fixedLayout}>
-          {/* <View style={styles.inputWrapper}> */}
-          {/* <SvgIcon width={24} height={24} style={styles.icon} /> */}
-          <TextInput
-            style={styles.textInput}
-            value={name}
-            onChangeText={setName}
-            placeholder="Your Name"
-          />
-          <Text style={styles.chooseColorText}>Choose a background color</Text>
-          <View style={styles.colorContainer}>
-            <TouchableOpacity
-              style={[styles.colorCircle, { backgroundColor: "#090C08" }]}
-              onPress={() => setChatColor("#090C08")}
+      {/* KeyboardAvoidingView wraps only the moving content */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={200} // Adjust this value as needed
+        style={{ flex: 1 }}
+      >
+        <View style={styles.container}>
+          <Text style={styles.title}>Sync</Text>
+          <View style={styles.fixedLayout}>
+            {/* <View style={styles.inputWrapper}> */}
+            {/* <SvgIcon width={24} height={24} style={styles.icon} /> */}
+            <TextInput
+              style={styles.textInput}
+              value={name}
+              onChangeText={setName}
+              placeholder="Your Name"
             />
-            <TouchableOpacity
-              style={[styles.colorCircle, { backgroundColor: "#474056" }]}
-              onPress={() => setChatColor("#474056")}
-            />
-            <TouchableOpacity
-              style={[styles.colorCircle, { backgroundColor: "#8A95A5" }]}
-              onPress={() => setChatColor("#8A95A5")}
-            />
-            <TouchableOpacity
-              style={[styles.colorCircle, { backgroundColor: "#B9C6AE" }]}
-              onPress={() => setChatColor("#B9C6AE")}
-            />
-          </View>
-          <View style={styles.buttonWrapper}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleStartChatting}
-            >
-              <Text style={styles.buttonText}>Start Chatting</Text>
-            </TouchableOpacity>
+            <Text style={styles.chooseColorText}>
+              Choose a background color
+            </Text>
+            <View style={styles.colorContainer}>
+              <TouchableOpacity
+                style={[styles.colorCircle, { backgroundColor: "#090C08" }]}
+                onPress={() => setChatColor("#090C08")}
+              />
+              <TouchableOpacity
+                style={[styles.colorCircle, { backgroundColor: "#474056" }]}
+                onPress={() => setChatColor("#474056")}
+              />
+              <TouchableOpacity
+                style={[styles.colorCircle, { backgroundColor: "#8A95A5" }]}
+                onPress={() => setChatColor("#8A95A5")}
+              />
+              <TouchableOpacity
+                style={[styles.colorCircle, { backgroundColor: "#B9C6AE" }]}
+                onPress={() => setChatColor("#B9C6AE")}
+              />
+            </View>
+            <View style={styles.buttonWrapper}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleSignIn} 
+              >
+                <Text style={styles.buttonText}>Start Chatting</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-        {Platform.OS === "ios" ? (
-          <KeyboardAvoidingView behavior="padding" />
-        ) : null}
-      </View>
+      </KeyboardAvoidingView>
     </ImageBackground>
   );
 };
@@ -103,7 +125,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#FFFFFF",
     marginTop: "100",
-    marginBottom: "200",
+    marginBottom: "100",
   },
   // inputWrapper: {
   //   flexDirection: "row",

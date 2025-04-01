@@ -25,10 +25,10 @@ const Start = () => {
   const auth = getAuth(); // Initialize outside for efficiency
 
   const handleSignIn = () => {
+
     signInAnonymously(auth)
       .then((userCredential) => {
         const user = userCredential.user;
-        console.log("User signed in anonymously:", user);
         //Pass userID to Chat so the app knows which messages belong to the user
         navigation.navigate("Chat", { userID: user.uid, name, chatColor });
         Alert.alert("Signed in Successfully!");

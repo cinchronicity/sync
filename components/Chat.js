@@ -16,6 +16,8 @@ import {
 } from "react-native-gifted-chat";
 import { collection, query, orderBy, onSnapshot, addDoc, where } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import CustomActions from "./CustomActions";
+import MapView from 'react-native-maps';
 
 
 const Chat = ({ route, navigation, db, isConnected }) => {
@@ -141,6 +143,33 @@ const Chat = ({ route, navigation, db, isConnected }) => {
       />
     );
   };
+// This function renders the CustomActions component, passing all received props to it.
+// used to add custom UI actions (e.g., buttons or menus) in the chat interface.
+// CustomActions component is a button that allows users to take a photo, choose an image from the library, or share their location.
+  const renderCustomActions = (props) => {
+    return <CustomActions {...props} />;
+  };
+//check if currentMesssage has a location data, if yes returm a mapview
+  const renderCustomView = (props) => {
+    const { currentMessage} = props;
+    if (currentMessage.location) {
+      return (
+          <MapView
+            style={{width: 150,
+              height: 100,
+              borderRadius: 13,
+              margin: 3}}
+            region={{
+              latitude: currentMessage.location.latitude,
+              longitude: currentMessage.location.longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+          />
+      );
+    }
+    return null;
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: chatColor }]}>
@@ -150,6 +179,8 @@ const Chat = ({ route, navigation, db, isConnected }) => {
         renderSystemMessage={renderSystemMessage} // Custom system message
         renderDay={renderDay} // Custom date
         renderInputToolbar={renderInputToolbar}
+        renderActions={renderCustomActions}
+        renderCustomView={renderCustomView}
         onSend={(messages) => onSend(messages)}
         user={{
           _id: userID, // Unique ID for the user

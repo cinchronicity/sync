@@ -51,13 +51,15 @@ const Chat = ({ route, navigation, db, isConnected }) => {
   
       // Real-time listener for messages
       unsubMessages = onSnapshot(messagesQuery, (snapshot) => {
+        // console.log("onSnapshot triggered"); NOT LOGGING
         let fetchedMessages = snapshot.docs.map((doc) => ({
           _id: doc.id, // Firestore document ID as unique key
-          text: doc.data().text,
+          text: doc.data().text || "", // Default to empty string if text is undefined
           createdAt: doc.data().createdAt.toDate(), // Convert Firestore Timestamp to Date
           user: doc.data().user,
+          location: doc.data.location || null, // Include location if it exists
         }));
-  
+        // console.log("Fetched messages from Firestore:", fetchedMessages); NOT LOGGING
         // Cache messages and update the state
         cacheMessages(fetchedMessages);
         setMessages(fetchedMessages);
@@ -147,15 +149,18 @@ const Chat = ({ route, navigation, db, isConnected }) => {
 // used to add custom UI actions (e.g., buttons or menus) in the chat interface.
 // CustomActions component is a button that allows users to take a photo, choose an image from the library, or share their location.
   const renderCustomActions = (props) => {
-    return <CustomActions {...props} />;
+    return <CustomActions onSend={onSend} {...props} />;
   };
-//check if currentMesssage has a location data, if yes returm a mapview
+
+//check if currentMesssage has a location data, if yes return a mapview
   const renderCustomView = (props) => {
     const { currentMessage} = props;
     if (currentMessage.location) {
+      // console.log("Rendering MapView for location:", currentMessage.location); NOT WORKING 
       return (
           <MapView
-            style={{width: 150,
+            style={{
+              width: 150,
               height: 100,
               borderRadius: 13,
               margin: 3}}
@@ -181,7 +186,7 @@ const Chat = ({ route, navigation, db, isConnected }) => {
         renderInputToolbar={renderInputToolbar}
         renderActions={renderCustomActions}
         renderCustomView={renderCustomView}
-        onSend={(messages) => onSend(messages)}
+        onSend={messages => onSend(messages)}
         user={{
           _id: userID, // Unique ID for the user
           name: name, 

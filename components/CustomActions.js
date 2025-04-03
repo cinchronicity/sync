@@ -52,20 +52,35 @@ const CustomActions = ({ wrapperStyle, iconTextStyle, onSend }) => {
       } else Alert.alert("Permissions haven't been granted.");
     }
   }
+
+  //NOT RENDERING
   const getLocation = async () => {
     let permissions = await Location.requestForegroundPermissionsAsync();
     if (permissions?.granted) {
       const location = await Location.getCurrentPositionAsync({});
       if (location) {
-        onSend({
+        const locationMessage = {
+          _id: Math.random().toString(36).substring(7), // Generate a random ID
+          createdAt: new Date(),
+          user: {
+            _id: 1, // Replace with the actual user ID
+            name: "User", // Replace with the actual user name
+          },
           location: {
             longitude: location.coords.longitude,
             latitude: location.coords.latitude,
           },
-        });
-      } else Alert.alert("Error occurred while fetching location");
-    } else Alert.alert("Permissions haven't been granted.");
-  }
+        };
+        console.log("Sending location message to onSend:", locationMessage); //IS WORKING CORRECTLY
+        onSend([locationMessage]); // Wrap the message in an array
+      } else {
+        Alert.alert("Error occurred while fetching location");
+      }
+    } else {
+      Alert.alert("Permissions haven't been granted.");
+    }
+  };
+
 
   return (
     <TouchableOpacity style={styles.container} onPress={onActionPress}>

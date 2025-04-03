@@ -39,6 +39,7 @@ const Start = () => {
       });
   };
 
+
   return (
     <ImageBackground
       source={require("../assets/background-image.png")}

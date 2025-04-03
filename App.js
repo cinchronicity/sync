@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { useEffect } from "react";
+import { getStorage } from "firebase/storage";
 
 const Stack = createNativeStackNavigator();
 
@@ -30,6 +31,8 @@ const App = () => {
 
   // Initialize Cloud Firestore and get a reference to the service (db variable)
   const db = getFirestore(app);
+  //initialize Cloud Storage and get a reference to the service (storage variable)
+  const storage = getStorage(app);
 
   //new state that represents the connection status
   const connectionStatus = useNetInfo();
@@ -43,8 +46,9 @@ const App = () => {
       );
     } else if (connectionStatus.isConnected === true) {
       //enable Firestore network when online
-      enableNetwork(db)
-        .catch((error) => console.error("Error enabling Firestore network:", error));
+      enableNetwork(db).catch((error) =>
+        console.error("Error enabling Firestore network:", error)
+      );
     }
   }, [connectionStatus.isConnected]); // Re-run effect when connection status changes
 
@@ -54,7 +58,14 @@ const App = () => {
         <Stack.Screen name="Start" component={Start} />
         <Stack.Screen name="Chat">
           {/* Pass the db variable to the Chat component via reacts "passing addiitonal props docs"*/}
-          {(props) => <Chat {...props} db={db} isConnected={connectionStatus.isConnected} />}
+          {(props) => (
+            <Chat
+              {...props}
+              db={db}
+              isConnected={connectionStatus.isConnected}
+              storage={storage}
+            />
+          )}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>

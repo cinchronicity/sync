@@ -14,13 +14,15 @@ import {
   SystemMessage, 
   InputToolbar, 
 } from "react-native-gifted-chat";
-import { collection, query, orderBy, onSnapshot, addDoc, where } from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot, addDoc, where,} from "firebase/firestore";
+import { deleteDoc, getDocs, doc} from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomActions from "./CustomActions";
 import MapView from 'react-native-maps';
 
 
-const Chat = ({ route, navigation, db, isConnected }) => {
+
+const Chat = ({ route, navigation, db, isConnected , storage}) => {
   const { name, chatColor, userID } = route.params;
   const [messages, setMessages] = useState([]);
 
@@ -34,35 +36,33 @@ const Chat = ({ route, navigation, db, isConnected }) => {
   let unsubMessages;
 
   useEffect(() => {
-    
     // Sets the username as navigation bar title
     navigation.setOptions({ title: name });
-  
     if (isConnected === true) {
       // Unregister the current onSnapshot() listener to avoid multiple listeners when useEffect re-executes.
       if (unsubMessages) unsubMessages();
       unsubMessages = null;
-  
       // Firestore query that sorts messages by creation date
       const messagesQuery = query(
         collection(db, "messages"),
         orderBy("createdAt", "desc")
       );
-  
       // Real-time listener for messages
-      unsubMessages = onSnapshot(messagesQuery, (snapshot) => {
-        // console.log("onSnapshot triggered"); NOT LOGGING
-        let fetchedMessages = snapshot.docs.map((doc) => ({
-          _id: doc.id, // Firestore document ID as unique key
-          text: doc.data().text || "", // Default to empty string if text is undefined
-          createdAt: doc.data().createdAt.toDate(), // Convert Firestore Timestamp to Date
-          user: doc.data().user,
-          location: doc.data.location || null, // Include location if it exists
-        }));
-        // console.log("Fetched messages from Firestore:", fetchedMessages); NOT LOGGING
-        // Cache messages and update the state
-        cacheMessages(fetchedMessages);
-        setMessages(fetchedMessages);
+      unsubMessages = onSnapshot(messagesQuery, (docs) => {
+        // console.log("onSnapshot triggered"); 
+        let newMessages = [];
+        docs.forEach(doc => {
+          newMessages.push({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: new Date(doc.data().createdAt.toMillis())
+          })
+        })
+        // console.log("Fetched messages from Firestore:", newMessages); // Log the messages array
+        // console.log("Updated messages:", newMessages); // Check if image/location messages are included
+
+        cacheMessages(newMessages);
+        setMessages(newMessages);
       });
     } else {
       loadCachedMessages(); // Load cached messages if offline
@@ -88,6 +88,7 @@ const Chat = ({ route, navigation, db, isConnected }) => {
       console.log(error.message);
     }
   };
+
   
   /**
    * Handler to load cached messages when offline
@@ -110,10 +111,12 @@ const Chat = ({ route, navigation, db, isConnected }) => {
     };
   
 
-  //save sent messages to Firestore database
+  // save sent messages to Firestore database
   const onSend = (newMessages) => {
     addDoc(collection(db, "messages"), newMessages[0]);
   };
+ 
+
 
   // Custom render for system messages from the GiftedChat library
   const renderSystemMessage = (props) => {
@@ -149,7 +152,7 @@ const Chat = ({ route, navigation, db, isConnected }) => {
 // used to add custom UI actions (e.g., buttons or menus) in the chat interface.
 // CustomActions component is a button that allows users to take a photo, choose an image from the library, or share their location.
   const renderCustomActions = (props) => {
-    return <CustomActions onSend={onSend} {...props} />;
+    return <CustomActions onSend={onSend} storage={storage} userID={userID} name={route.params.name} {...props} />;
   };
 
 //check if currentMesssage has a location data, if yes return a mapview

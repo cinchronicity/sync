@@ -13,7 +13,6 @@ const CustomActions = ({
   name,
 }) => {
   const actionSheet = useActionSheet();
-  // console.log("User's name:", name); // Debug log to ensure the name is passed correctly
 
   //when user presses action button, it will show an action sheet with options
   const onActionPress = () => {
@@ -51,15 +50,15 @@ const CustomActions = ({
       const location = await Location.getCurrentPositionAsync({});
       if (location) {
         const locationMessage = {
-          // _id: Date.now().toString(),
+          _id: new Date().getTime().toString(), // Unique ID for the message
           location: {
             longitude: location.coords.longitude,
             latitude: location.coords.latitude,
           },
           createdAt: new Date(), // Add timestamp
           user: {
-            _id: userID, // Replace with your user ID logic
-            name: name, // Replace with your user name logic
+            _id: userID, 
+            name: name, 
           },
         };
         console.log("Sending location message:", locationMessage); // Debug log
@@ -104,7 +103,17 @@ const CustomActions = ({
     uploadBytes(newUploadRef, blob).then(async (snapshot) => {
       const imageURL = await getDownloadURL(snapshot.ref);
       console.log("Image URL: ", imageURL);
-      onSend({ image: imageURL });
+      onSend([
+        {
+          _id: new Date().getTime().toString(),
+          createdAt: new Date(),
+          user: {
+            _id: userID,
+            name: name,
+          },
+          image: imageURL,
+        },
+      ]);
     });
   };
 

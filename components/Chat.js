@@ -11,18 +11,22 @@ import {
   GiftedChat,
   Bubble,
   Day,
-  SystemMessage, 
-  InputToolbar, 
+  SystemMessage,
+  InputToolbar,
 } from "react-native-gifted-chat";
-import { collection, query, orderBy, onSnapshot, addDoc, where,} from "firebase/firestore";
-import { deleteDoc, getDocs, doc} from "firebase/firestore";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  addDoc,
+  where,
+} from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomActions from "./CustomActions";
-import MapView from 'react-native-maps';
+import MapView from "react-native-maps";
 
-
-
-const Chat = ({ route, navigation, db, isConnected , storage}) => {
+const Chat = ({ route, navigation, db, isConnected, storage }) => {
   const { name, chatColor, userID } = route.params;
   const [messages, setMessages] = useState([]);
 
@@ -49,31 +53,27 @@ const Chat = ({ route, navigation, db, isConnected , storage}) => {
       );
       // Real-time listener for messages
       unsubMessages = onSnapshot(messagesQuery, (docs) => {
-        // console.log("onSnapshot triggered"); 
         let newMessages = [];
-        docs.forEach(doc => {
+        docs.forEach((doc) => {
           newMessages.push({
             id: doc.id,
             ...doc.data(),
-            createdAt: new Date(doc.data().createdAt.toMillis())
-          })
-        })
-        // console.log("Fetched messages from Firestore:", newMessages); // Log the messages array
-        // console.log("Updated messages:", newMessages); // Check if image/location messages are included
-
+            createdAt: new Date(doc.data().createdAt.toMillis()),
+          });
+        });
         cacheMessages(newMessages);
         setMessages(newMessages);
       });
     } else {
       loadCachedMessages(); // Load cached messages if offline
     }
-  
+
     return () => {
       // Clean up Firestore listener when the component unmounts
       if (unsubMessages) unsubMessages();
     };
   }, [isConnected]); // Re-run effect when connection status changes
-  
+
   /**
    * Handler to cache messages to AsyncStorage
    * @param messagesToCache The messages array to store in the cache
@@ -89,7 +89,6 @@ const Chat = ({ route, navigation, db, isConnected , storage}) => {
     }
   };
 
-  
   /**
    * Handler to load cached messages when offline
    */
@@ -100,23 +99,20 @@ const Chat = ({ route, navigation, db, isConnected , storage}) => {
     }
   };
 
-    /**
+  /**
    * Handler to render the InputToolbar
    * @param props The default props of InputToolbar
    * @returns InputToolbar if internet connection is available, otherwise null
    */
-    const renderInputToolbar = (props) => {
-      if (isConnected) return <InputToolbar {...props} />;
-      else return null;
-    };
-  
+  const renderInputToolbar = (props) => {
+    if (isConnected) return <InputToolbar {...props} />;
+    else return null;
+  };
 
   // save sent messages to Firestore database
   const onSend = (newMessages) => {
     addDoc(collection(db, "messages"), newMessages[0]);
   };
- 
-
 
   // Custom render for system messages from the GiftedChat library
   const renderSystemMessage = (props) => {
@@ -148,60 +144,67 @@ const Chat = ({ route, navigation, db, isConnected , storage}) => {
       />
     );
   };
-// This function renders the CustomActions component, passing all received props to it.
-// used to add custom UI actions (e.g., buttons or menus) in the chat interface.
-// CustomActions component is a button that allows users to take a photo, choose an image from the library, or share their location.
+
+  // CustomActions component is a button that allows users to take a photo, choose an image from the library, or share their location.
   const renderCustomActions = (props) => {
-    return <CustomActions onSend={onSend} storage={storage} userID={userID} name={route.params.name} {...props} />;
+    return (
+      <CustomActions
+        onSend={onSend}
+        storage={storage}
+        userID={userID}
+        name={route.params.name}
+        {...props}
+      />
+    );
   };
 
-//check if currentMesssage has a location data, if yes return a mapview
+  //check if currentMesssage has a location data, if yes return a mapview
   const renderCustomView = (props) => {
-    const { currentMessage} = props;
+    const { currentMessage } = props;
     if (currentMessage.location) {
-      // console.log("Rendering MapView for location:", currentMessage.location); NOT WORKING 
       return (
-          <MapView
-            style={{
-              width: 150,
-              height: 100,
-              borderRadius: 13,
-              margin: 3}}
-            region={{
-              latitude: currentMessage.location.latitude,
-              longitude: currentMessage.location.longitude,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
-            }}
-          />
+        <MapView
+          style={{
+            width: 150,
+            height: 100,
+            borderRadius: 13,
+            margin: 3,
+          }}
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        />
       );
     }
     return null;
-  }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: chatColor }]}>
       <GiftedChat
         messages={messages}
         renderBubble={renderBubble}
-        renderSystemMessage={renderSystemMessage} // Custom system message
-        renderDay={renderDay} // Custom date
+        renderSystemMessage={renderSystemMessage}
+        renderDay={renderDay}
         renderInputToolbar={renderInputToolbar}
         renderActions={renderCustomActions}
         renderCustomView={renderCustomView}
-        onSend={messages => onSend(messages)}
+        onSend={(messages) => onSend(messages)}
         user={{
           _id: userID, // Unique ID for the user
-          name: name, 
+          name: name,
         }}
-
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === "android" ? "height" : "padding"}
-   
+        keyboardVerticalOffset={-210}
       />
     </View>
-  );x
+  );
+  x;
 };
 
 const styles = StyleSheet.create({

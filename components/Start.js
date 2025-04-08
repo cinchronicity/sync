@@ -14,7 +14,6 @@ import {
   Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-// import SvgIcon from "../assets/icon.svg"; // Import the SVG icon
 import { getAuth, signInAnonymously } from "firebase/auth";
 
 const Start = () => {
@@ -25,7 +24,6 @@ const Start = () => {
   const auth = getAuth(); // Initialize outside for efficiency
 
   const handleSignIn = () => {
-
     signInAnonymously(auth)
       .then((userCredential) => {
         const user = userCredential.user;
@@ -38,7 +36,6 @@ const Start = () => {
         Alert.alert("Unable to sign in, please try again later.");
       });
   };
-
 
   return (
     <ImageBackground
@@ -54,8 +51,6 @@ const Start = () => {
         <View style={styles.container}>
           <Text style={styles.title}>Sync</Text>
           <View style={styles.fixedLayout}>
-            {/* <View style={styles.inputWrapper}> */}
-            {/* <SvgIcon width={24} height={24} style={styles.icon} /> */}
             <TextInput
               style={styles.textInput}
               value={name}
@@ -67,27 +62,40 @@ const Start = () => {
             </Text>
             <View style={styles.colorContainer}>
               <TouchableOpacity
-                style={[styles.colorCircle, { backgroundColor: "#090C08" }]}
-                onPress={() => setChatColor("#090C08")}
+                style={[
+                  styles.colorCircle,
+                  { backgroundColor: "#282928" },
+                  chatColor === "#282928" && styles.selectedColorCircle, // Add outline if selected
+                ]}
+                onPress={() => setChatColor("#282928")}
               />
               <TouchableOpacity
-                style={[styles.colorCircle, { backgroundColor: "#474056" }]}
+                style={[
+                  styles.colorCircle,
+                  { backgroundColor: "#474056" },
+                  chatColor === "#474056" && styles.selectedColorCircle,
+                ]}
                 onPress={() => setChatColor("#474056")}
               />
               <TouchableOpacity
-                style={[styles.colorCircle, { backgroundColor: "#8A95A5" }]}
+                style={[
+                  styles.colorCircle,
+                  { backgroundColor: "#8A95A5" },
+                  chatColor === "#8A95A5" && styles.selectedColorCircle, 
+                ]}
                 onPress={() => setChatColor("#8A95A5")}
               />
               <TouchableOpacity
-                style={[styles.colorCircle, { backgroundColor: "#B9C6AE" }]}
+                style={[
+                  styles.colorCircle,
+                  { backgroundColor: "#B9C6AE" },
+                  chatColor === "#B9C6AE" && styles.selectedColorCircle,
+                ]}
                 onPress={() => setChatColor("#B9C6AE")}
               />
             </View>
             <View style={styles.buttonWrapper}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={handleSignIn} 
-              >
+              <TouchableOpacity style={styles.button} onPress={handleSignIn}>
                 <Text style={styles.buttonText}>Start Chatting</Text>
               </TouchableOpacity>
             </View>
@@ -128,13 +136,6 @@ const styles = StyleSheet.create({
     marginTop: "100",
     marginBottom: "100",
   },
-  // inputWrapper: {
-  //   flexDirection: "row",
-  //   alignItems: "center",
-  //   width: "100%",
-  //   marginBottom: 12,
-  // },
-
   textInput: {
     borderColor: "gray",
     borderWidth: 1,
@@ -154,7 +155,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "300",
     color: "#757083",
-    // opacity: 1,
     marginBottom: 10,
   },
   colorContainer: {
@@ -167,6 +167,10 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
+  },
+  selectedColorCircle: {
+    borderWidth: 1, 
+    borderColor: "#000000", 
   },
   buttonWrapper: {
     width: "100%",

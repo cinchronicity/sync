@@ -6,6 +6,7 @@
 - [Features](#features)
 - [User Stories](#user-stories)
 - [Tech Stack](#tech-stack)
+- [Setting Up the Environment](#Setting-Up-the-Environment)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
@@ -38,6 +39,57 @@ Sync is React Native Mobile Chat App is a real-time chat application built using
 - **Backend**: Firebase Firestore Database, Firebase Authentication, Firebase Cloud Storage
 - **Libraries**: Gifted Chat, AsyncStorage, Expo Location, Expo ImagePicker
 
+
+## Setting Up the Environment
+
+To ensure your development environment is properly configured for running the Sync chat app, follow these steps:
+
+**Install Node.js**
+
+1. Download and install Node.js from nodejs.org.
+
+
+
+**Set Up Expo**
+
+1. Create an Expo account at expo.dev.
+
+2. Install Expo Go on your mobile device from the App Store or Google Play.
+
+**Install Android Studio (For Android Emulator)**
+
+1. Download and install Android Studio.
+
+2. Open Android Studio and go to SDK Manager to install necessary SDK tools.
+
+3. Under **SDK Platforms** ensure the following are checked: 
+   - Android 15.0 ("Vanilla Ice Cream")
+   - Android SDK Platform 35
+   - Sources for Android 35
+   - Google Play ARM 64 v8a System Image
+
+4. Under **SDK Tools** ensure the following are checked: 
+   - Android SDK Build-Tools 36 
+   - Android Emulator 
+   - Android SDK PLatform- Tools 
+
+
+**Firebase Configuration**
+
+1. Create a Firebase project at Firebase Console.
+
+2. Enable Firestore Database and Authentication.
+
+3. Configure read/write "Rules" Tab of database configuration. 
+   Example: 
+   - allow read, write: if **false**; 
+
+   Change to; 
+   - allow read, write: if **true**; 
+
+
+
+
 ## Installation
 1. Clone the repository:
    ```sh
@@ -51,9 +103,12 @@ Sync is React Native Mobile Chat App is a real-time chat application built using
    ```sh
    npm install
    ```
-4. Start the Expo development server:
+4. Start the Expo development server: 
+You do not need to install expo-cli globally. Instead, you can use npx to run Expo:
+This will automatically use the latest version of Expo CLI:
+
    ```sh
-   npm start
+   npx expo start
    ```
 
 ## Usage
@@ -67,14 +122,10 @@ Sync is React Native Mobile Chat App is a real-time chat application built using
 sync/
 │── assets/                  # Static images and icons
 │── components/              # Reusable UI components
-│── services/                # Firebase and API service handlers
-│── App.js                   # Main app entry point
+│── App.js                   # Main app entry point & Firebase and API service handlers
 │── package.json             # Project dependencies and scripts
 │── README.md                # Project documentation
 ```
-<!-- 
-## Screenshots
-(Add images here if available) -->
 
 ## Future Enhancements
 - Push notifications for new messages
